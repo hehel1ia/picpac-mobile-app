@@ -1,5 +1,4 @@
-// Пока каталог — mock. На этапе 4 заменим тело getProducts() на запрос в Supabase:
-//   const { data, error } = await supabase.from('products').select('*'); if (error) throw error; return data;
+
 export interface Product {
   id: string; category: string; name: string; description: string;
   minPhotos: number; minPx: number; leadDays: number; currency: 'BYN';
@@ -12,9 +11,33 @@ const MOCK: Product[] = [
   { id: 'canvas', category: 'Печать', name: 'Холст 30×40', description: 'Печать на холсте, подрамник', minPhotos: 1, minPx: 2400, leadDays: 4, currency: 'BYN', variants: [{ name: '30×40', price: 42 }, { name: '40×60', price: 68 }] },
 ];
 
+
 export async function getProducts(): Promise<Product[]> {
-  await new Promise((r) => setTimeout(r, 400)); // имитация сети
-  return MOCK;
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+  if (!API_URL) {
+    throw new Error('Не указан EXPO_PUBLIC_API_URL');
+  }
+
+  const response = await fetch(`${API_URL}/catalog`);
+
+  if (!response.ok) {
+    throw new Error(`Ошибка загрузки каталога: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return data.products.map((p: any) => ({
+    id: p.id,
+    category: p.category === 'photobook' ? 'Книги' : 'Печать',
+    name: p.name,
+    description: p.description ?? '',
+    minPhotos: p.min_photos,
+    minPx: p.min_px,
+    leadDays: p.lead_days,
+    currency: p.currency,
+    variants: p.variants,
+  }));
 }
 
 export const priceText = (n: number, cur = 'BYN') => `${n.toFixed(2).replace('.', ',')} ${cur}`;
