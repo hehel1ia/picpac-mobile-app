@@ -3,6 +3,9 @@ import { z } from 'zod';
 
 dotenv.config({ quiet: true });
 
+// Сообщения валидации zod по-русски
+z.config(z.locales.ru());
+
 const schema = z.object({
   PORT: z.coerce.number().int().positive().default(5001),
   SUPABASE_URL: z.url(),

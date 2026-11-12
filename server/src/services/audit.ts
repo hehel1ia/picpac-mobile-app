@@ -2,7 +2,11 @@ import { supabaseAdmin } from '../lib/supabase.js';
 
 export type AuditResult = 'ok' | 'denied' | 'error';
 
-
+/**
+ * Запись в журнал audit_log: кто (user_id), когда (created_at), что (action),
+ * над чем (object), с каким результатом (result). Не бросает ошибок:
+ * сбой журнала не должен ломать основную операцию.
+ */
 export async function logAction(
   userId: string | null,
   action: string,

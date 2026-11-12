@@ -6,6 +6,11 @@ export const notFound: RequestHandler = (req, _res, next) => {
   next(new AppError(404, 'NOT_FOUND', `Маршрут не найден: ${req.method} ${req.path}`));
 };
 
+/**
+ * Единый формат ошибок для всех ответов:
+ *   { "error": { "code": "FORBIDDEN", "message": "Недостаточно прав", "details"?: ... } }
+ * Четвёртый аргумент нужен Express, чтобы распознать обработчик ошибок.
+ */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   let appError: AppError;
 
