@@ -1,18 +1,20 @@
+
 import { ReactElement, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
+
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import ProductScreen from './src/screens/ProductScreen';
-import ProjectScreen from './src/screens/ProjectScreen';
 import CartScreen from './src/screens/CartScreen';
 import OrderScreen from './src/screens/OrderScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
-import { colors } from './src/theme';
 import CheckoutScreen from './src/screens/CheckoutScreen';
 import PrintScreen from './src/screens/PrintScreen';
 import AlbumScreen from './src/screens/AlbumScreen';
+
+import { colors } from './src/theme';
 import { pickPhotos } from './src/lib/pickPhotos';
 import type { Photo } from './src/types/order';
 import type { Product } from './src/api/products';
@@ -43,7 +45,14 @@ function NavIcon({ name, active }: { name: string; active: boolean }) {
   if (name === 'Профиль') {
     return (
       <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Circle cx="12" cy="8" r="4" fill={active ? color : 'none'} stroke={color} strokeWidth={1.8} />
+        <Circle
+          cx="12"
+          cy="8"
+          r="4"
+          fill={active ? color : 'none'}
+          stroke={color}
+          strokeWidth={1.8}
+        />
         <Path
           d="M4.5 20C4.5 16.5 7.8 14 12 14C16.2 14 19.5 16.5 19.5 20"
           fill={active ? color : 'none'}
@@ -74,6 +83,7 @@ function NavIcon({ name, active }: { name: string; active: boolean }) {
 export default function App() {
   const [tab, setTab] = useState('Вход');
   const [userPhone, setUserPhone] = useState<string | null>(null);
+  const [selectedPhotos, setSelectedPhotos] = useState<Photo[]>([]);
 
   const handleLogin = (phone: string) => {
     setUserPhone(phone);
@@ -85,42 +95,69 @@ export default function App() {
     setTab('Главная');
   };
 
-  const [selectedPhotos, setSelectedPhotos] = useState<Photo[]>([]);
-
   const handleOpenProduct = async (product: Product) => {
-  const photos = await pickPhotos();
+    const photos = await pickPhotos();
 
-  if (!photos.length) return;
+    if (!photos.length) return;
 
-  setSelectedPhotos(photos);
+    setSelectedPhotos(photos);
 
-  if (product.category === 'Печать') {
-    setTab('Фотопечать');
-  } else {
-    setTab('Фотоальбом');
-  }
-};
-  
+    if (product.category === 'Печать') {
+      setTab('Фотопечать');
+    } else {
+      setTab('Фотоальбом');
+    }
+  };
 
   const screens: Record<string, ReactElement> = {
-    'Вход': <LoginScreen onLogin={handleLogin} onGuest={handleGuest} />,
-    'Главная': <HomeScreen onOpenProduct={handleOpenProduct} onOpenProject={() => setTab('Проект')}/>,
-    'Продукт': <ProductScreen onBack={() => setTab('Главная')} onStart={() => setTab('Проект')} />,
-    'Проект': <ProjectScreen onBack={() => setTab('Продукт')} onCheck={() => Alert.alert('Проверка', 'Здесь будет проверка проекта')} />,
-    'Корзина': <CartScreen loggedIn={!!userPhone} onBack={() => setTab('Главная')} onConfirm={() => setTab('Оформление')} onLogin={() => setTab('Вход')}
-/>,
-    'Оформление': userPhone ? (
-  <CheckoutScreen
-    onBack={() => setTab('Корзина')}
-    onSuccess={() => setTab('Заказ')}
-  />
-) : (
-  <LoginScreen
-    onLogin={handleLogin}
-    onGuest={handleGuest}
+    'Вход': (
+      <LoginScreen
+        onLogin={handleLogin}
+        onGuest={handleGuest}
+      />
+    ),
+
+    'Главная': (
+  <HomeScreen
+    onOpenProduct={handleOpenProduct}
+    onOpenProject={() => setTab('Продукт')}
   />
 ),
-    'Заказ': <OrderScreen onBack={() => setTab('Профиль')} />,
+
+    'Продукт': (
+      <ProductScreen
+        onBack={() => setTab('Главная')}
+        onStart={() => setTab('Главная')}
+      />
+    ),
+
+    'Корзина': (
+      <CartScreen
+        loggedIn={!!userPhone}
+        onBack={() => setTab('Главная')}
+        onConfirm={() => setTab('Оформление')}
+        onLogin={() => setTab('Вход')}
+      />
+    ),
+
+    'Оформление': userPhone ? (
+      <CheckoutScreen
+        onBack={() => setTab('Корзина')}
+        onSuccess={() => setTab('Заказ')}
+      />
+    ) : (
+      <LoginScreen
+        onLogin={handleLogin}
+        onGuest={handleGuest}
+      />
+    ),
+
+    'Заказ': (
+      <OrderScreen
+        onBack={() => setTab('Профиль')}
+      />
+    ),
+
     'Профиль': (
       <HistoryScreen
         isGuest={!userPhone}
@@ -129,40 +166,65 @@ export default function App() {
         onOpenOrder={() => setTab('Заказ')}
       />
     ),
-    'Фотопечать': (
-  <PrintScreen
-    initialPhotos={selectedPhotos}
-    onBack={() => setTab('Главная')}
-    onGoCart={() => setTab('Корзина')}
-    onCheckout={() => setTab('Оформление')}
-  />
-),
 
-'Фотоальбом': (
-  <AlbumScreen
-    photos={selectedPhotos}
-    onBack={() => setTab('Главная')}
-    onGoCart={() => setTab('Корзина')}
-    onCheckout={() => setTab('Оформление')}
-  />
-),
+    'Фотопечать': (
+      <PrintScreen
+        initialPhotos={selectedPhotos}
+        onBack={() => setTab('Главная')}
+        onGoCart={() => setTab('Корзина')}
+        onCheckout={() => setTab('Оформление')}
+      />
+    ),
+
+    'Фотоальбом': (
+      <AlbumScreen
+        photos={selectedPhotos}
+        onBack={() => setTab('Главная')}
+        onGoCart={() => setTab('Корзина')}
+        onCheckout={() => setTab('Оформление')}
+      />
+    ),
   };
 
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: colors.cream }}>
-        <View style={{ flex: 1 }}>{screens[tab]}</View>
+        <View style={{ flex: 1 }}>
+          {screens[tab] ?? screens['Главная']}
+        </View>
 
         {['Главная', 'Корзина', 'Профиль'].includes(tab) && (
           <View style={styles.navWrapper} pointerEvents="box-none">
             <View style={styles.navBar}>
               {NAV_ITEMS.map((item) => {
                 const isActive = tab === item.key;
+
                 return (
-                  <Pressable key={item.key} onPress={() => setTab(item.key)} style={styles.navItem}>
-                    <NavIcon name={item.key} active={isActive} />
-                    <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>{item.label}</Text>
-                    <View style={[styles.indicator, !isActive && { opacity: 0 }]} />
+                  <Pressable
+                    key={item.key}
+                    onPress={() => setTab(item.key)}
+                    style={styles.navItem}
+                  >
+                    <NavIcon
+                      name={item.key}
+                      active={isActive}
+                    />
+
+                    <Text
+                      style={[
+                        styles.navLabel,
+                        isActive && styles.navLabelActive,
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+
+                    <View
+                      style={[
+                        styles.indicator,
+                        !isActive && { opacity: 0 },
+                      ]}
+                    />
                   </Pressable>
                 );
               })}
@@ -175,7 +237,13 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  navWrapper: { position: 'absolute', bottom: 20, left: 16, right: 16 },
+  navWrapper: {
+    position: 'absolute',
+    bottom: 20,
+    left: 16,
+    right: 16,
+  },
+
   navBar: {
     flexDirection: 'row',
     backgroundColor: '#FFF8F7',
@@ -190,8 +258,30 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 6,
   },
-  navItem: { alignItems: 'center', justifyContent: 'center', minWidth: 72, gap: 3 },
-  navLabel: { fontSize: 12, fontWeight: '600', color: colors.ink },
-  navLabelActive: { color: colors.red, fontWeight: '700' },
-  indicator: { marginTop: 2, width: 38, height: 3.5, borderRadius: 2, backgroundColor: colors.red },
+
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 72,
+    gap: 3,
+  },
+
+  navLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+
+  navLabelActive: {
+    color: colors.red,
+    fontWeight: '700',
+  },
+
+  indicator: {
+    marginTop: 2,
+    width: 38,
+    height: 3.5,
+    borderRadius: 2,
+    backgroundColor: colors.red,
+  },
 });
