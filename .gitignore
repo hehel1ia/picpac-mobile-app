@@ -6,7 +6,7 @@ server/node_modules/
 dist/
 build/
 server/dist/
-
+server/.expo/
 
 .env
 server/.env
