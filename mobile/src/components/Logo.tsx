@@ -9,7 +9,7 @@ export default function Logo({ height: h = 40 }: { height?: number }) {
   return (
     <Image
       source={source}
-      style={{ height: h, aspectRatio: ratio }}
+      style={{ height: h, aspectRatio: ratio, alignSelf: 'center' }}
       resizeMode="contain"
       accessibilityLabel="picPac.by"
     />

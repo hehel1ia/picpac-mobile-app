@@ -11,11 +11,16 @@ import OrderScreen from './src/screens/OrderScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import { colors } from './src/theme';
 import CheckoutScreen from './src/screens/CheckoutScreen';
+import PrintScreen from './src/screens/PrintScreen';
+import AlbumScreen from './src/screens/AlbumScreen';
+import { pickPhotos } from './src/lib/pickPhotos';
+import type { Photo } from './src/types/order';
+import type { Product } from './src/api/products';
 
 const NAV_ITEMS = [
   { key: 'Главная', label: 'Главная' },
-  { key: 'История', label: 'Профиль' },
   { key: 'Корзина', label: 'Корзина' },
+  { key: 'Профиль', label: 'Профиль' },
 ] as const;
 
 function NavIcon({ name, active }: { name: string; active: boolean }) {
@@ -35,7 +40,7 @@ function NavIcon({ name, active }: { name: string; active: boolean }) {
     );
   }
 
-  if (name === 'История') {
+  if (name === 'Профиль') {
     return (
       <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
         <Circle cx="12" cy="8" r="4" fill={active ? color : 'none'} stroke={color} strokeWidth={1.8} />
@@ -80,15 +85,43 @@ export default function App() {
     setTab('Главная');
   };
 
+  const [selectedPhotos, setSelectedPhotos] = useState<Photo[]>([]);
+
+  const handleOpenProduct = async (product: Product) => {
+  const photos = await pickPhotos();
+
+  if (!photos.length) return;
+
+  setSelectedPhotos(photos);
+
+  if (product.category === 'Печать') {
+    setTab('Фотопечать');
+  } else {
+    setTab('Фотоальбом');
+  }
+};
+  
+
   const screens: Record<string, ReactElement> = {
     'Вход': <LoginScreen onLogin={handleLogin} onGuest={handleGuest} />,
-    'Главная': <HomeScreen onOpenProduct={() => setTab('Продукт')} onOpenProject={() => setTab('Проект')} />,
+    'Главная': <HomeScreen onOpenProduct={handleOpenProduct} onOpenProject={() => setTab('Проект')}/>,
     'Продукт': <ProductScreen onBack={() => setTab('Главная')} onStart={() => setTab('Проект')} />,
     'Проект': <ProjectScreen onBack={() => setTab('Продукт')} onCheck={() => Alert.alert('Проверка', 'Здесь будет проверка проекта')} />,
-        'Корзина': <CartScreen onBack={() => setTab('Проект')} onConfirm={() => setTab('Оформление')} />,
-    'Оформление': <CheckoutScreen onBack={() => setTab('Корзина')} onSuccess={() => setTab('Заказ')} />,
-    'Заказ': <OrderScreen onBack={() => setTab('История')} />,
-    'История': (
+    'Корзина': <CartScreen loggedIn={!!userPhone} onBack={() => setTab('Главная')} onConfirm={() => setTab('Оформление')} onLogin={() => setTab('Вход')}
+/>,
+    'Оформление': userPhone ? (
+  <CheckoutScreen
+    onBack={() => setTab('Корзина')}
+    onSuccess={() => setTab('Заказ')}
+  />
+) : (
+  <LoginScreen
+    onLogin={handleLogin}
+    onGuest={handleGuest}
+  />
+),
+    'Заказ': <OrderScreen onBack={() => setTab('Профиль')} />,
+    'Профиль': (
       <HistoryScreen
         isGuest={!userPhone}
         phone={userPhone ?? undefined}
@@ -96,6 +129,23 @@ export default function App() {
         onOpenOrder={() => setTab('Заказ')}
       />
     ),
+    'Фотопечать': (
+  <PrintScreen
+    initialPhotos={selectedPhotos}
+    onBack={() => setTab('Главная')}
+    onGoCart={() => setTab('Корзина')}
+    onCheckout={() => setTab('Оформление')}
+  />
+),
+
+'Фотоальбом': (
+  <AlbumScreen
+    photos={selectedPhotos}
+    onBack={() => setTab('Главная')}
+    onGoCart={() => setTab('Корзина')}
+    onCheckout={() => setTab('Оформление')}
+  />
+),
   };
 
   return (
@@ -103,7 +153,7 @@ export default function App() {
       <View style={{ flex: 1, backgroundColor: colors.cream }}>
         <View style={{ flex: 1 }}>{screens[tab]}</View>
 
-        {['Главная', 'История', 'Корзина'].includes(tab) && (
+        {['Главная', 'Корзина', 'Профиль'].includes(tab) && (
           <View style={styles.navWrapper} pointerEvents="box-none">
             <View style={styles.navBar}>
               {NAV_ITEMS.map((item) => {

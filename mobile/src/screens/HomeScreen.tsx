@@ -109,10 +109,10 @@ export default function HomeScreen({ onOpenProduct, onOpenProject }: Props) {
 
 const styles = StyleSheet.create({
   header: {
-    marginTop: 12,
+    marginTop: 20,
     marginBottom: 10,
     marginLeft: 10, 
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   grid: {
     flexDirection: 'row',
