@@ -2,9 +2,21 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { colors, radius } from '../theme';
 
 type Variant = 'solid' | 'outline' | 'light';
-interface Props { label: string; onPress: () => void; variant?: Variant; disabled?: boolean }
+interface Props {
+  label: string;
+  onPress: () => void;
+  variant?: Variant;
+  disabled?: boolean;
+  fullWidth?: boolean;
+}
 
-export default function Button({ label, onPress, variant = 'solid', disabled }: Props) {
+export default function Button({
+  label,
+  onPress,
+  variant = 'solid',
+  disabled,
+  fullWidth,
+}: Props) {
   const v = variants[variant];
   return (
     <Pressable
@@ -12,7 +24,13 @@ export default function Button({ label, onPress, variant = 'solid', disabled }: 
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.base, v.box, pressed && { opacity: 0.8 }, disabled && { opacity: 0.5 }]}
+      style={({ pressed }) => [
+        styles.base,
+        fullWidth && styles.fullWidth,
+        v.box,
+        pressed && { opacity: 0.8 },
+        disabled && { opacity: 0.5 },
+      ]}
     >
       <Text style={[styles.text, { color: v.color }]}>{label}</Text>
     </Pressable>
@@ -26,6 +44,24 @@ const variants = {
 };
 
 const styles = StyleSheet.create({
-  base: { minHeight: 48, paddingHorizontal: 18, borderRadius: radius.button, borderWidth: 2, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start' },
-  text: { fontWeight: '800', fontSize: 16 },
+  base: {
+    minHeight: 48,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: radius.button,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
+  fullWidth: {
+    alignSelf: 'stretch',
+    width: '100%',
+  },
+  text: {
+    fontWeight: '800',
+    fontSize: 16,
+    textAlign: 'center',
+    width: '100%',
+  },
 });

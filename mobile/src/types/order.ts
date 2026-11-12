@@ -48,8 +48,21 @@ export const MIN_SPREADS = 10;
 export const MAX_SPREADS = 40;
 export const ALBUM_MIN_PX = 1200;
 
-// Цена одного альбома = обложка + формат + ламинация + бумага + разворотов × 4
 export const albumPrice = (cover: number, format: number, lam: number, paper: number, spreads: number) =>
   cover + format + lam + paper + spreads * SPREAD_PRICE;
 
 export const money = (n: number) => `${n.toFixed(2).replace('.', ',')} BYN`;
+
+export interface SlotRect { x: number; y: number; w: number; h: number }
+// Координаты слотов в долях разворота (0..1)
+export const ALBUM_TEMPLATES: { id: string; name: string; note: string; slots: SlotRect[] }[] = [
+  { id: 'classic', name: 'Классика', note: 'По фото на странице', slots: [
+    { x: 0.05, y: 0.08, w: 0.43, h: 0.84 }, { x: 0.52, y: 0.08, w: 0.43, h: 0.84 }] },
+  { id: 'collage', name: 'Коллаж', note: '1 крупное + 2 малых', slots: [
+    { x: 0.04, y: 0.06, w: 0.46, h: 0.88 }, { x: 0.54, y: 0.06, w: 0.42, h: 0.43 }, { x: 0.54, y: 0.51, w: 0.42, h: 0.43 }] },
+  { id: 'full', name: 'Во весь разворот', note: 'Одно фото', slots: [{ x: 0, y: 0, w: 1, h: 1 }] },
+  { id: 'mosaic', name: 'Мозаика', note: '4 фото', slots: [
+    { x: 0.04, y: 0.06, w: 0.44, h: 0.42 }, { x: 0.04, y: 0.52, w: 0.44, h: 0.42 },
+    { x: 0.52, y: 0.06, w: 0.44, h: 0.42 }, { x: 0.52, y: 0.52, w: 0.44, h: 0.42 }] },
+];
+export const SPREAD_ASPECT: Record<string, number> = { '20x20': 2, '20x30': 4 / 3, '30x30': 2 };
