@@ -1,5 +1,4 @@
-// Пока каталог — mock. На этапе 4 заменим тело getProducts() на запрос в Supabase:
-//   const { data, error } = await supabase.from('products').select('*'); if (error) throw error; return data;
+
 export interface Product {
   id: string; category: string; name: string; description: string;
   minPhotos: number; minPx: number; leadDays: number; currency: 'BYN';

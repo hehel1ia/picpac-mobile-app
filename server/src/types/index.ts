@@ -8,3 +8,15 @@ export interface AuthUser {
   isAnonymous: boolean;
   role: Role;
 }
+
+
+export const ORDER_STATUS_LABELS = [
+  'Оформлен',
+  'В работе',
+  'Отправлен',
+  'Готов'
+] as const;
+
+export function orderStatusLabel(status: number): string {
+  return ORDER_STATUS_LABELS[status] ?? 'Неизвестно';
+}
