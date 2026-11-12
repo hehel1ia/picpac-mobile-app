@@ -5,10 +5,7 @@ import { createUserClient, supabaseAdmin } from '../lib/supabase.js';
 import { logAction } from '../services/audit.js';
 import { ROLES, type AuthUser, type Role } from '../types/index.js';
 
-/**
- * Проверяет токен Supabase из заголовка Authorization: Bearer <token>,
- * определяет роль по таблице profiles и кладёт в req.user и req.db.
- */
+
 export const requireAuth: RequestHandler = async (req, _res, next) => {
   const header = req.headers.authorization ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
@@ -29,7 +26,7 @@ export const requireAuth: RequestHandler = async (req, _res, next) => {
     throw new AppError(500, 'INTERNAL', 'Ошибка сервера, попробуйте ещё раз');
   }
 
-  // Нет профиля или неизвестная роль: даём минимальные права
+ 
   const role: Role = ROLES.find((r) => r === profile?.role) ?? 'customer';
 
   req.user = {
@@ -42,10 +39,7 @@ export const requireAuth: RequestHandler = async (req, _res, next) => {
   next();
 };
 
-/**
- * Пускает только указанные роли, иначе 403 и запись в журнал.
- * Использовать после requireAuth: router.use(requireAuth, requireRole('admin'))
- */
+
 export function requireRole(...allowed: Role[]): RequestHandler {
   return async (req, _res, next) => {
     if (!req.user) throw new AppError(401, 'UNAUTHORIZED', 'Войдите в аккаунт');
@@ -57,7 +51,6 @@ export function requireRole(...allowed: Role[]): RequestHandler {
   };
 }
 
-/** Достаёт пользователя и его клиент БД из запроса (после requireAuth). */
 export function authed(req: Request): { user: AuthUser; db: SupabaseClient } {
   if (!req.user || !req.db) throw new AppError(401, 'UNAUTHORIZED', 'Войдите в аккаунт');
   return { user: req.user, db: req.db };

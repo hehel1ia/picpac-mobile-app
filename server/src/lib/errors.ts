@@ -8,7 +8,7 @@ export type ErrorCode =
   | 'PAYLOAD_TOO_LARGE'
   | 'INTERNAL';
 
-/** Ошибка, текст которой безопасно показать пользователю. */
+
 export class AppError extends Error {
   constructor(
     public readonly status: number,
@@ -26,11 +26,7 @@ interface DbError {
   message: string;
 }
 
-/**
- * Превращает ошибку Postgres/PostgREST в HTTP-ошибку.
- *   28000 -> 401, 42501 -> 403, P0002 -> 404, 22023 -> 422
- * Сообщения 28000, P0002, 22023 написаны нами в миграции и безопасны для показа.
- */
+
 export function fromDbError(e: DbError): AppError {
   switch (e.code) {
     case '28000':
@@ -57,14 +53,13 @@ export function fromDbError(e: DbError): AppError {
   }
 }
 
-/** Возвращает data или бросает ошибку. Если data пустая, это 404. */
 export function unwrap<T>(res: { data: T | null; error: DbError | null }): T {
   if (res.error) throw fromDbError(res.error);
   if (res.data === null) throw new AppError(404, 'NOT_FOUND', 'Данные не найдены');
   return res.data;
 }
 
-/** Для запросов без результата (rpc void, delete): бросает ошибку, если она есть. */
+
 export function ensure(res: { error: DbError | null }): void {
   if (res.error) throw fromDbError(res.error);
 }

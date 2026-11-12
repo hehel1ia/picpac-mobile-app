@@ -31,12 +31,7 @@ const PRODUCT_FIELDS =
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/**
- * Формат карточки продукта для клиента.
- * price_unit: 'per_photo' - цена варианта за одно фото (фотопечать),
- *             'per_item'  - цена варианта за одно изделие (фотокниги).
- * estimated_ready_at: ориентировочная дата готовности, ISO 8601 в UTC (сегодня + lead_days).
- */
+
 function toProduct(row: ProductRow) {
   const { pricing, ...rest } = row;
   const prices = row.variants.map((v) => v.price);
@@ -56,7 +51,6 @@ const idParam = z.object({
   id: z.string().regex(/^[a-z0-9-]{1,50}$/, 'Некорректный идентификатор продукта'),
 });
 
-/** Список продуктов. Необязательный фильтр: ?category=print|photobook */
 catalogRouter.get('/', async (req, res) => {
   const { category } = listQuery.parse(req.query);
 
@@ -69,7 +63,7 @@ catalogRouter.get('/', async (req, res) => {
   res.json({ products: (data as ProductRow[]).map(toProduct) });
 });
 
-/** Один продукт с вариантами и шаблонами раскладки. */
+
 catalogRouter.get('/:id', async (req, res) => {
   const { id } = idParam.parse(req.params);
 

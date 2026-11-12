@@ -8,14 +8,14 @@ export const meRouter = Router();
 
 const PROFILE_FIELDS = 'id, full_name, phone, role, created_at';
 
-/** Текущий пользователь и его профиль. Нужен клиенту после входа. */
+
 meRouter.get('/', async (req, res) => {
   const { user, db } = authed(req);
   const profile = unwrap(await db.from('profiles').select(PROFILE_FIELDS).eq('id', user.id).single());
   res.json({ user: { id: user.id, email: user.email, isAnonymous: user.isAnonymous }, profile });
 });
 
-// strictObject: любые лишние поля (например role) дают ошибку 422
+
 const patchBody = z
   .strictObject({
     full_name: z.string().trim().min(1, 'Введите имя').max(80, 'Не больше 80 символов').optional(),
@@ -28,7 +28,7 @@ const patchBody = z
   })
   .refine((v) => Object.keys(v).length > 0, 'Нет данных для изменения');
 
-/** Изменить имя и телефон. Телефон можно очистить, передав null. */
+
 meRouter.patch('/', async (req, res) => {
   const { user, db } = authed(req);
   const body = patchBody.parse(req.body);
